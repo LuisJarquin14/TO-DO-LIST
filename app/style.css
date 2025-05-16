@@ -298,6 +298,46 @@ body[data-theme='dark'] .delete-btn:hover {
     background: var(--color-secondary);
 }
 
+/* Botón de cambio de idioma */
+.lang-toggle {
+    position: absolute;
+    top: 20px;
+    right: 80px;
+    background: #43cea2;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: background 0.3s;
+    z-index: 10;
+}
+.lang-toggle:hover {
+    background: #185a9d;
+}
+
+@media (max-width: 500px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .task-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-btn, #clear-completed {
+        margin-bottom: 5px;
+    }
+    
+    .lang-toggle {
+        right: 80px;
+    }
+}
+
 /* Mejoras de foco visual para accesibilidad */
 :focus {
     outline: 2px solid #fda085;
@@ -315,17 +355,7 @@ body[data-theme='dark'] .delete-btn:hover {
     box-shadow: 0 0 0 2px #fda08533;
 }
 
-@media (max-width: 500px) {
-    .container {
-        padding: 15px;
-    }
-    
-    .task-filters {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .filter-btn, #clear-completed {
-        margin-bottom: 5px;
-    }
+/* Elimina estilos de la papelera de reciclaje */
+#recycle-bin-btn, #empty-recycle-bin-btn {
+    display: none !important;
 }

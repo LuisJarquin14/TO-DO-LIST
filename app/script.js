@@ -11,6 +11,7 @@ class TaskManager {
         this.filterButtons = document.querySelectorAll('.filter-btn');
         this.clearCompletedBtn = document.getElementById('clear-completed');
         this.themeToggleBtn = document.getElementById('theme-toggle');
+        this.langToggleBtn = document.getElementById('lang-toggle');
         this.init();
     }
 
@@ -18,6 +19,7 @@ class TaskManager {
     init() {
         this.loadTasks();
         this.loadTheme();
+        this.applyLanguage();
         this.taskForm.addEventListener('submit', (e) => {
             e.preventDefault();
             this.addTask(this.taskInput.value);
@@ -30,6 +32,12 @@ class TaskManager {
         });
         this.clearCompletedBtn.addEventListener('click', () => this.clearCompletedTasks());
         this.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
+        if (this.langToggleBtn) {
+            this.langToggleBtn.addEventListener('click', () => {
+                const nextLang = this.lang === 'es' ? 'en' : 'es';
+                this.setLanguage(nextLang);
+            });
+        }
     }
 
     // Carga tareas desde localStorage
@@ -61,10 +69,11 @@ class TaskManager {
         this.taskInput.focus();
         // Alerta SweetAlert2
         if (window.Swal) {
+            const t = this.lang === 'es' ? this.translations.es : this.translations.en;
             Swal.fire({
                 icon: 'success',
-                title: 'Tarea agregada',
-                text: '¡Tu tarea ha sido creada exitosamente!',
+                title: t.swalAddTitle,
+                text: t.swalAddText,
                 timer: 1200,
                 showConfirmButton: false
             });
@@ -73,33 +82,36 @@ class TaskManager {
 
     // Elimina una tarea
     deleteTask(id) {
+        const task = this.tasks.find(t => t.id === id);
+        if (!task) return;
         if (window.Swal) {
+            const t = this.lang === 'es' ? this.translations.es : this.translations.en;
             Swal.fire({
-                title: '¿Eliminar tarea?',
-                text: 'Esta acción no se puede deshacer.',
+                title: t.swalDeleteTitle,
+                text: t.swalDeleteText,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#fda085',
                 cancelButtonColor: '#888',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar',
+                confirmButtonText: t.swalDeleteConfirm,
+                cancelButtonText: t.swalDeleteCancel,
                 focusCancel: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    this.tasks = this.tasks.filter(task => task.id !== id);
+                    this.tasks = this.tasks.filter(t => t.id !== id);
                     this.saveTasks();
                     this.renderTasks();
                     Swal.fire({
                         icon: 'info',
-                        title: 'Tarea eliminada',
-                        text: 'La tarea fue eliminada.',
+                        title: t.swalDeleted,
+                        text: t.swalDeletedText,
                         timer: 1200,
                         showConfirmButton: false
                     });
                 }
             });
         } else {
-            this.tasks = this.tasks.filter(task => task.id !== id);
+            this.tasks = this.tasks.filter(t => t.id !== id);
             this.saveTasks();
             this.renderTasks();
         }
@@ -119,10 +131,11 @@ class TaskManager {
         this.renderTasks();
         // Alerta SweetAlert2
         if (window.Swal) {
+            const t = this.lang === 'es' ? this.translations.es : this.translations.en;
             Swal.fire({
                 icon: completed ? 'success' : 'warning',
-                title: completed ? '¡Tarea completada!' : 'Tarea marcada como activa',
-                text: completed ? '¡Buen trabajo!' : 'Puedes seguir trabajando en esta tarea.',
+                title: completed ? t.swalCompleted : t.swalActive,
+                text: completed ? t.swalCompletedText : t.swalActiveText,
                 timer: 1200,
                 showConfirmButton: false
             });
@@ -151,7 +164,8 @@ class TaskManager {
     // Actualiza el contador
     updateTasksCounter() {
         const activeTasks = this.tasks.filter(task => !task.completed).length;
-        this.tasksCounter.textContent = `${activeTasks} task${activeTasks !== 1 ? 's' : ''} left`;
+        const t = this.lang === 'es' ? this.translations.es : this.translations.en;
+        this.tasksCounter.textContent = t.tasksLeft(activeTasks);
     }
 
     // Crea el elemento de tarea
@@ -182,22 +196,8 @@ class TaskManager {
             }
         });
 
-        const deleteButton = document.createElement('button');
-        deleteButton.classList.add('delete-btn');
-        deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteButton.setAttribute('aria-label', 'Delete task');
-        deleteButton.tabIndex = 0;
-        deleteButton.addEventListener('click', () => this.deleteTask(task.id));
-        deleteButton.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                this.deleteTask(task.id);
-            }
-        });
-
         taskItem.appendChild(checkbox);
         taskItem.appendChild(taskText);
-        taskItem.appendChild(deleteButton);
         return taskItem;
     }
 
@@ -243,10 +243,11 @@ class TaskManager {
     renderTasks() {
         const filteredTasks = this.getFilteredTasks();
         this.taskList.innerHTML = '';
+        const t = this.lang === 'es' ? this.translations.es : this.translations.en;
         if (filteredTasks.length === 0) {
             const emptyMessage = document.createElement('li');
             emptyMessage.classList.add('task-item', 'empty-message');
-            emptyMessage.textContent = 'No tasks to display';
+            emptyMessage.textContent = t.noTasks;
             this.taskList.appendChild(emptyMessage);
         } else {
             filteredTasks.forEach(task => {
@@ -290,6 +291,92 @@ class TaskManager {
             ? '<i class="fas fa-sun"></i>'
             : '<i class="fas fa-moon"></i>';
     }
+
+    // --- Cambio de idioma ---
+    setLanguage(lang) {
+        localStorage.setItem('lang', lang);
+        this.lang = lang;
+        this.applyLanguage();
+        if (this.langToggleBtn) {
+            this.langToggleBtn.setAttribute('aria-label', lang === 'es' ? 'Cambiar a inglés' : 'Switch to Spanish');
+        }
+    }
+
+    applyLanguage() {
+        const t = this.lang === 'es' ? this.translations.es : this.translations.en;
+        // El título principal NO cambia de idioma
+        // Placeholder input
+        this.taskInput.placeholder = t.addTaskPlaceholder;
+        // Botón agregar
+        document.getElementById('add-button').textContent = t.add;
+        // Filtros
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        if (filterBtns.length === 3) {
+            filterBtns[0].textContent = t.all;
+            filterBtns[1].textContent = t.active;
+            filterBtns[2].textContent = t.completed;
+        }
+        // Botón limpiar completadas
+        this.clearCompletedBtn.textContent = t.clearCompleted;
+        // Botones de selección múltiple
+        const multiDeleteBtn = document.getElementById('delete-selected-btn');
+        if (multiDeleteBtn) multiDeleteBtn.textContent = t.deleteSelected;
+        const multiRestoreBtn = document.getElementById('restore-selected-btn');
+        if (multiRestoreBtn) multiRestoreBtn.textContent = t.restoreSelected;
+        // Contador de tareas
+        this.updateTasksCounter();
+        // Mensajes vacíos
+        this.renderTasks();
+    }
+    // Traducciones
+    translations = {
+        en: {
+            todo: 'To-Do',
+            addTaskPlaceholder: 'Add a new task...',
+            add: 'Add',
+            all: 'All',
+            active: 'Active',
+            completed: 'Completed',
+            clearCompleted: 'Clear Completed',
+            tasksLeft: n => `${n} task${n !== 1 ? 's' : ''} left`,
+            noTasks: 'No tasks to display',
+            swalAddTitle: 'Task added',
+            swalAddText: 'Your task was created successfully!',
+            swalDeleteTitle: 'Delete task?',
+            swalDeleteText: 'This action cannot be undone.',
+            swalDeleteConfirm: 'Yes, delete',
+            swalDeleteCancel: 'Cancel',
+            swalDeleted: 'Task deleted',
+            swalDeletedText: 'The task was deleted.',
+            swalCompleted: 'Task completed!',
+            swalCompletedText: 'Good job!',
+            swalActive: 'Task marked as active',
+            swalActiveText: 'You can keep working on this task.',
+        },
+        es: {
+            todo: 'Tareas',
+            addTaskPlaceholder: 'Agregar una nueva tarea...',
+            add: 'Agregar',
+            all: 'Todas',
+            active: 'Activas',
+            completed: 'Completadas',
+            clearCompleted: 'Limpiar completadas',
+            tasksLeft: n => `${n} tarea${n !== 1 ? 's' : ''} restante${n !== 1 ? 's' : ''}`,
+            noTasks: 'No hay tareas para mostrar',
+            swalAddTitle: 'Tarea agregada',
+            swalAddText: '¡Tu tarea ha sido creada exitosamente!',
+            swalDeleteTitle: '¿Eliminar tarea?',
+            swalDeleteText: 'Esta acción no se puede deshacer.',
+            swalDeleteConfirm: 'Sí, eliminar',
+            swalDeleteCancel: 'Cancelar',
+            swalDeleted: 'Tarea eliminada',
+            swalDeletedText: 'La tarea fue eliminada.',
+            swalCompleted: '¡Tarea completada!',
+            swalCompletedText: '¡Buen trabajo!',
+            swalActive: 'Tarea marcada como activa',
+            swalActiveText: 'Puedes seguir trabajando en esta tarea.',
+        }
+    };
 }
 
 // Inicializa la app profesionalizada
