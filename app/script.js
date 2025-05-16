@@ -144,9 +144,39 @@ class TaskManager {
 
     // Limpia tareas completadas
     clearCompletedTasks() {
-        this.tasks = this.tasks.filter(task => !task.completed);
-        this.saveTasks();
-        this.renderTasks();
+        const t = this.lang === 'es' ? this.translations.es : this.translations.en;
+        const completedCount = this.tasks.filter(task => task.completed).length;
+        if (completedCount === 0) return;
+        if (window.Swal) {
+            Swal.fire({
+                title: t.swalClearCompletedTitle,
+                text: t.swalClearCompletedText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: t.swalClearCompletedConfirm,
+                cancelButtonText: t.swalClearCompletedCancel,
+                confirmButtonColor: '#fda085',
+                cancelButtonColor: '#888',
+                focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.tasks = this.tasks.filter(task => !task.completed);
+                    this.saveTasks();
+                    this.renderTasks();
+                    Swal.fire({
+                        icon: 'success',
+                        title: t.swalClearCompletedSuccess,
+                        text: t.swalClearCompletedSuccessText,
+                        timer: 1200,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        } else {
+            this.tasks = this.tasks.filter(task => !task.completed);
+            this.saveTasks();
+            this.renderTasks();
+        }
     }
 
     // Filtra tareas
@@ -188,21 +218,57 @@ class TaskManager {
         taskText.textContent = task.text;
         taskText.tabIndex = 0;
         taskText.setAttribute('aria-label', 'Edit task');
-        // Edición inline al hacer doble clic o Enter
-        taskText.addEventListener('dblclick', () => this.editTaskInline(task, taskText, taskItem));
-        taskText.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                this.editTaskInline(task, taskText, taskItem);
-            }
-        });
-
+        // Solo permitir edición si la tarea NO está completada
+        if (!task.completed) {
+            taskText.addEventListener('dblclick', () => this.editTaskInline(task, taskText, taskItem));
+            taskText.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    this.editTaskInline(task, taskText, taskItem);
+                }
+            });
+        }
+        // Botón editar
+        const editButton = document.createElement('button');
+        editButton.classList.add('edit-btn');
+        editButton.innerHTML = '<i class="fas fa-pen"></i>';
+        editButton.setAttribute('aria-label', 'Edit task');
+        editButton.tabIndex = 0;
+        // Solo permitir editar si la tarea NO está completada
+        if (!task.completed) {
+            editButton.addEventListener('click', () => {
+                const t = this.lang === 'es' ? this.translations.es : this.translations.en;
+                if (window.Swal) {
+                    Swal.fire({
+                        title: t.swalEditTitle,
+                        text: t.swalEditText,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: t.swalEditConfirm,
+                        cancelButtonText: t.swalEditCancel,
+                        confirmButtonColor: '#43cea2',
+                        cancelButtonColor: '#888',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.editTaskInline(task, taskText, taskItem, true);
+                        }
+                    });
+                } else {
+                    this.editTaskInline(task, taskText, taskItem, true);
+                }
+            });
+        } else {
+            editButton.disabled = true;
+            editButton.style.opacity = 0.5;
+            editButton.style.cursor = 'not-allowed';
+        }
         taskItem.appendChild(checkbox);
         taskItem.appendChild(taskText);
+        taskItem.appendChild(editButton);
         return taskItem;
     }
 
     // Edición inline de tareas
-    editTaskInline(task, taskTextElem, taskItemElem) {
+    editTaskInline(task, taskTextElem, taskItemElem, showSaveIcon = false) {
         const input = document.createElement('input');
         input.type = 'text';
         input.value = task.text;
@@ -212,31 +278,60 @@ class TaskManager {
         input.style.padding = '6px';
         input.style.border = '1px solid #fda085';
         input.style.borderRadius = '4px';
+        let saveBtn = null;
+        let editBtn = taskItemElem.querySelector('.edit-btn');
+        if (editBtn) editBtn.style.display = 'none';
+        if (showSaveIcon) {
+            saveBtn = document.createElement('button');
+            saveBtn.className = 'save-btn';
+            saveBtn.innerHTML = '<i class="fas fa-save"></i>';
+            saveBtn.style.marginLeft = '8px';
+            saveBtn.setAttribute('aria-label', 'Save task');
+            saveBtn.addEventListener('click', () => {
+                this.saveTaskEdit(task, input.value, taskTextElem, input, saveBtn, editBtn);
+            });
+        }
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                this.saveTaskEdit(task, input.value, taskTextElem, input);
+                this.saveTaskEdit(task, input.value, taskTextElem, input, saveBtn, editBtn);
             } else if (e.key === 'Escape') {
                 taskItemElem.replaceChild(taskTextElem, input);
+                if (saveBtn) saveBtn.remove();
+                if (editBtn) editBtn.style.display = '';
             }
         });
         input.addEventListener('blur', () => {
-            this.saveTaskEdit(task, input.value, taskTextElem, input);
+            if (!showSaveIcon) this.saveTaskEdit(task, input.value, taskTextElem, input, saveBtn, editBtn);
         });
         taskItemElem.replaceChild(input, taskTextElem);
+        if (saveBtn) taskItemElem.appendChild(saveBtn);
         input.focus();
         input.select();
     }
 
-    saveTaskEdit(task, newText, taskTextElem, inputElem) {
+    saveTaskEdit(task, newText, taskTextElem, inputElem, saveBtn, editBtn) {
         const trimmed = newText.trim();
         if (trimmed && trimmed !== task.text) {
             this.tasks = this.tasks.map(t => t.id === task.id ? { ...t, text: trimmed } : t);
             this.saveTasks();
             this.renderTasks();
+            if (window.Swal) {
+                const t = this.lang === 'es' ? this.translations.es : this.translations.en;
+                Swal.fire({
+                    icon: 'success',
+                    title: t.swalEditSuccess,
+                    text: t.swalEditSuccessText,
+                    timer: 1200,
+                    showConfirmButton: false
+                });
+            }
         } else {
-            // Si no hay cambios, solo restaurar el texto
             inputElem.parentNode.replaceChild(taskTextElem, inputElem);
+            if (saveBtn) saveBtn.remove();
+            if (editBtn) editBtn.style.display = '';
         }
+        if (editBtn) editBtn.style.display = '';
+        if (saveBtn) saveBtn.remove();
     }
 
     // Renderiza las tareas
@@ -352,6 +447,18 @@ class TaskManager {
             swalCompletedText: 'Good job!',
             swalActive: 'Task marked as active',
             swalActiveText: 'You can keep working on this task.',
+            swalEditTitle: 'Edit task',
+            swalEditText: 'Do you want to change the name of this task?',
+            swalEditConfirm: 'Edit',
+            swalEditCancel: 'Cancel',
+            swalEditSuccess: 'Task updated',
+            swalEditSuccessText: 'The task name was changed successfully!',
+            swalClearCompletedTitle: 'Clear completed tasks?',
+            swalClearCompletedText: 'If you continue, all completed tasks will be permanently deleted.',
+            swalClearCompletedConfirm: 'Yes, clear',
+            swalClearCompletedCancel: 'Cancel',
+            swalClearCompletedSuccess: 'Completed tasks cleared',
+            swalClearCompletedSuccessText: 'All completed tasks have been deleted.',
         },
         es: {
             todo: 'Tareas',
@@ -375,6 +482,18 @@ class TaskManager {
             swalCompletedText: '¡Buen trabajo!',
             swalActive: 'Tarea marcada como activa',
             swalActiveText: 'Puedes seguir trabajando en esta tarea.',
+            swalEditTitle: 'Editar tarea',
+            swalEditText: '¿Deseas cambiar el nombre de esta tarea?',
+            swalEditConfirm: 'Editar',
+            swalEditCancel: 'Cancelar',
+            swalEditSuccess: 'Tarea actualizada',
+            swalEditSuccessText: '¡El nombre de la tarea fue cambiado exitosamente!',
+            swalClearCompletedTitle: '¿Limpiar tareas completadas?',
+            swalClearCompletedText: 'Si continúas, todas las tareas completadas se eliminarán permanentemente.',
+            swalClearCompletedConfirm: 'Sí, limpiar',
+            swalClearCompletedCancel: 'Cancelar',
+            swalClearCompletedSuccess: 'Tareas completadas eliminadas',
+            swalClearCompletedSuccessText: 'Todas las tareas completadas han sido eliminadas.',
         }
     };
 }
