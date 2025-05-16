@@ -1,0 +1,331 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background: linear-gradient(120deg, #f6d365, #fda085);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    color: #333;
+    font-size: 2rem;
+}
+
+#task-form {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+#task-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px 0 0 5px;
+    font-size: 1rem;
+    outline: none;
+}
+
+#task-input:focus {
+    border-color: #fda085;
+}
+
+#add-button {
+    background-color: #fda085;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+#add-button:hover {
+    background-color: #f6d365;
+}
+
+.task-filters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.filter-btn, #clear-completed {
+    background-color: transparent;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.filter-btn:hover, #clear-completed:hover {
+    background-color: #f6d365;
+    color: white;
+    border-color: #f6d365;
+}
+
+.filter-btn.active {
+    background-color: #fda085;
+    color: white;
+    border-color: #fda085;
+}
+
+#task-list {
+    list-style-type: none;
+    margin-bottom: 20px;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.task-item:last-child {
+    border-bottom: none;
+}
+
+.task-checkbox {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.task-text {
+    flex: 1;
+    font-size: 1rem;
+    color: #333;
+    word-break: break-word;
+}
+
+.completed .task-text {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.delete-btn {
+    background-color: transparent;
+    border: none;
+    color: #ff6b6b;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.3s;
+}
+
+.delete-btn:hover {
+    color: #ff5252;
+}
+
+.task-stats {
+    text-align: center;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* Títulos principales */
+.main-title {
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 0.5em;
+    color: #23272f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    text-shadow: 0 4px 16px #fda08533, 0 2px 0 #fff;
+    padding: 0.2em 0.5em;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.7);
+    box-shadow: 0 2px 12px #fda08522;
+    position: relative;
+    z-index: 2;
+}
+
+.main-title i {
+    color: #fda085;
+    font-size: 2.4rem;
+    filter: drop-shadow(0 2px 6px #fda08566);
+    animation: bounce 1.2s infinite alternate;
+}
+
+@keyframes bounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
+}
+
+.gradient-text {
+    background: linear-gradient(90deg, #fda085, #f6d365, #43cea2, #185a9d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 8px #fda08533;
+    font-style: italic;
+}
+
+body[data-theme='dark'] .main-title {
+    color: #f1f1f1;
+    text-shadow: 0 2px 8px #23272f99, 0 1px 0 #23272f;
+    background: rgba(35,39,47,0.7);
+}
+
+body[data-theme='dark'] .main-title i {
+    color: #f6d365;
+    filter: drop-shadow(0 2px 6px #23272f);
+}
+
+/* Modo oscuro/claro */
+:root {
+    --color-bg: #fff;
+    --color-bg-dark: #23272f;
+    --color-text: #333;
+    --color-text-dark: #f1f1f1;
+    --color-primary: #fda085;
+    --color-secondary: #f6d365;
+    --color-accent: #ff6b6b;
+    --color-border: #ddd;
+    --color-border-dark: #444;
+}
+
+body[data-theme='dark'] {
+    background: linear-gradient(120deg, #23272f, #434343);
+}
+
+body[data-theme='dark'] .container {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-dark);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+}
+
+body[data-theme='dark'] header h1,
+body[data-theme='dark'] .task-text {
+    color: var(--color-text-dark);
+}
+
+body[data-theme='dark'] #task-input {
+    background: #23272f;
+    color: var(--color-text-dark);
+    border-color: var(--color-border-dark);
+}
+
+body[data-theme='dark'] #add-button {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+body[data-theme='dark'] .filter-btn,
+body[data-theme='dark'] #clear-completed {
+    border-color: var(--color-border-dark);
+    color: var(--color-text-dark);
+}
+
+body[data-theme='dark'] .filter-btn.active {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+body[data-theme='dark'] .task-item {
+    border-bottom: 1px solid #444;
+}
+
+body[data-theme='dark'] .completed .task-text {
+    color: #aaa;
+}
+
+body[data-theme='dark'] .delete-btn {
+    color: #ff8b8b;
+}
+
+body[data-theme='dark'] .delete-btn:hover {
+    color: #ff5252;
+}
+
+/* Botón de cambio de tema */
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: background 0.3s;
+    z-index: 10;
+}
+.theme-toggle:hover {
+    background: var(--color-secondary);
+}
+
+/* Mejoras de foco visual para accesibilidad */
+:focus {
+    outline: 2px solid #fda085;
+    outline-offset: 2px;
+    z-index: 2;
+}
+
+.filter-btn:focus, #clear-completed:focus, #add-button:focus, .theme-toggle:focus {
+    box-shadow: 0 0 0 3px #fda08544;
+    outline: none;
+}
+
+.edit-task-input:focus {
+    border-color: #fda085;
+    box-shadow: 0 0 0 2px #fda08533;
+}
+
+@media (max-width: 500px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .task-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-btn, #clear-completed {
+        margin-bottom: 5px;
+    }
+}

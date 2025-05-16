@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="main-title">
+                <i class="fas fa-bolt"></i> TaskMaster Pro <span class="gradient-text">To-Do</span>
+            </h1>
+            <!-- Botón de cambio de tema -->
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" tabindex="0">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+        
+        <form id="task-form" aria-label="Add new task">
+            <input type="text" id="task-input" placeholder="Add a new task..." autocomplete="off" aria-label="Task input" />
+            <button type="submit" id="add-button" aria-label="Add task">Add</button>
+        </form>
+        
+        <div class="task-filters" role="group" aria-label="Task filters">
+            <button class="filter-btn active" data-filter="all" aria-pressed="true" tabindex="0">All</button>
+            <button class="filter-btn" data-filter="active" aria-pressed="false" tabindex="0">Active</button>
+            <button class="filter-btn" data-filter="completed" aria-pressed="false" tabindex="0">Completed</button>
+            <button id="clear-completed" tabindex="0">Clear Completed</button>
+        </div>
+        
+        <ul id="task-list" role="list" aria-label="Task list">
+            <!-- Tasks will be added here dynamically -->
+        </ul>
+        
+        <div class="task-stats" aria-live="polite">
+            <span id="tasks-counter">0 tasks left</span>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="script.js"></script>
+</body>
+</html>
